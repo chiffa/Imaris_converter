@@ -1,6 +1,7 @@
 import os
 import subprocess
 from shutil import rmtree
+import time
 
 ############################################################################
 # EDIT THIS VARIABLES ONLY!
@@ -40,8 +41,6 @@ def flatten_folders(directory):
                 os.rename(full_pos_folder, new_pos_name)
 
 
-
-
 def pattern_name(dir, time, color, slice):
     return "%s_T%s_C%s_Z%s.tif" % (dir.split('\\')[-1], time, channel_renaming_dict[color], slice)
 
@@ -54,7 +53,7 @@ def perform_renaming(position_directory):
             new_name = pattern_name(position_directory, time, channel, z_slice)
             full_new_name = os.path.join(position_directory, new_name)
             os.rename(full_name, full_new_name)
-            print "image renaming: %s -> %s" % (full_name, full_new_name)
+            # print "image renaming: %s -> %s" % (full_name, full_new_name)
 
 
 def perform_conversion(source_directory):
@@ -62,10 +61,12 @@ def perform_conversion(source_directory):
     for img_name in os.listdir(source_directory):
         if '.tif' in img_name:
             base_image = os.path.join(source_directory, img_name)
+            break
 
-    outfile = os.path.join(destination_folder, source_directory.split('\\')[-1]+'.ims')
+    if base_image:
+        outfile = os.path.join(destination_folder, source_directory.split('\\')[-1]+'.ims')
 
-    command_array = [imaris_file_converter,
+        command_array = [imaris_file_converter,
                      '--input',
                      base_image,
                      '--outputformat',
@@ -74,8 +75,11 @@ def perform_conversion(source_directory):
                      outfile
                     ]
 
-    print subprocess.list2cmdline(command_array)
-    subprocess.Popen(command_array)
+        print subprocess.list2cmdline(command_array)
+        subprocess.call(command_array)
+
+    else:
+        print 'Nothing found to in folder %s' % source_directory
 
 
 def iterate_over_positions():
@@ -86,7 +90,17 @@ def iterate_over_positions():
             perform_conversion(full_name)
 
 
+def main():
+    message = "DO NOT CONVERT RAW OR UNDUPLICATED DATA: AFTER CONVERSION INPUT FOLDER CONTENTS WILL BE DELETED.\n Do you agree with it? (Y)es/(N)o\n"
+    confirm = raw_input(message)
+    if confirm.lower() in ['y', 'yes']:
+        flatten_folders(source_folder)
+        iterate_over_positions()
+        clean_up()
+        raw_input('Processing is now finished. Press enter to close.')
+    else:
+        raw_input('Aborted. Please enter to close.')
+
+
 if __name__ == "__main__":
-    flatten_folders(source_folder)
-    iterate_over_positions()
-    clean_up()
+    main()

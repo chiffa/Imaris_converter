@@ -1,4 +1,6 @@
-#  Helping Imaris batch process files tiff stacks (because Imaris-batch, just as sleep, is for the weak ;).
+#  Helping Imaris batch process files tiff stacks
+
+(because Imaris-batch, just as sleep, is for the weak ;).
 
 Should work with Imaris 8.2, no guarantees for your data integrity though: use at your own risk. Works only with Windows.
 Edit the input, output and command line access to the Imaris
