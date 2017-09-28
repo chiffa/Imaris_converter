@@ -5,18 +5,44 @@ import time
 
 ############################################################################
 # EDIT THIS VARIABLES ONLY!
-source_folder = "C:\\Users\\RongLiAdmin\\Desktop\\input"
-destination_folder = "C:\\Users\\RongLiAdmin\\Desktop\\output"
-
-imaris_file_converter = "C:\\Program Files\\Bitplane\\bpImarisDataService\\bisque-056\\bqenv\\Scripts\\ImarisConvert\\ImarisConvert.exe"
+source_folder = "Z:\\Imaris Converter\\input"
+destination_folder = "Z:\\Imaris Converter\\output"
+Imaris_install_directory = "C:\\Program Files\\Bitplane"
 ############################################################################
 
+
+def find_converter_path():
+    likely_folders = [f for f in os.listdir(Imaris_install_directory) if os.path.isdir(os.path.join(Imaris_install_directory, f))]
+    likely_folders = [f for f in likely_folders if "ImarisFileConverter" in f]
+
+    if len(likely_folders) == 0:
+        raise Exception("Imaris file converter not found in default install directory, please make sure that Imaris is installed or change the Imaris install directory")
+
+    if len(likely_folders) > 1:
+        print "Multiple Imaris versions installed . Choose which one you would like to use among the following:"
+        for i, full_folder_name in enumerate(likely_folders):
+            print 'option', i+1, '\t', full_folder_name
+        chosen_option = raw_input('Please type the number of the option corresponding to the version you would like to use\n>')
+        likely_folders = [likely_folders[int(chosen_option)-1]]
+
+        # raise Exception("Imaris file converter not found or too many potential converters found. Here are the top-direcories %s", likely_folders)
+
+    imaris_file_converter = os.path.join(os.path.join(Imaris_install_directory,
+                                                      likely_folders[0]),
+                                         "ImarisConvert.exe")
+
+    print 'using file converter located at %s' % imaris_file_converter
+
+    return imaris_file_converter
+
+imaris_file_converter = find_converter_path()
+
 channel_renaming_dict = {
-    "RFP" : '0',
+    "Cy5" : '0',
     "GFP" : '1',
-    "CFP" : '2',
+    "RFP" : '2',
     "YFP" : '3',
-    "Cy5" : '4',
+    "CFP" : '4',
     'DAPI': '5',
 }
 
